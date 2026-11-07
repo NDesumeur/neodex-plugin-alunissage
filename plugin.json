@@ -1,0 +1,22 @@
+{
+  "id": "neodex.alunissage",
+  "name": "Alunissage",
+  "version": "1.0.0",
+  "author": "NDesumeur",
+  "description": "Pose le module lunaire en douceur sur une plateforme, avec peu de carburant. Plus la plateforme est petite, plus elle rapporte.",
+  "icon": "icon.png",
+  "entry": "index.js",
+  "view": "alunissage",
+  "neobase": ">=4.0.0",
+  "type": "app",
+  "category": "Jeux",
+  "syncMode": "progression",
+  "syncInfo": "Mission atteinte, meilleur score.",
+  "mobile": false,
+  "system": false,
+  "dependencies": {},
+  "sdk": "2.1.0",
+  "permissions": [
+    "storage"
+  ]
+}
