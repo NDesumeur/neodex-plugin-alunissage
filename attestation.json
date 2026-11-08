@@ -1,9 +1,9 @@
 {
   "pluginId": "neodex.alunissage",
   "repo": "NDesumeur/neodex-plugin-alunissage",
-  "version": "1.0.0",
-  "sha256": "1de23cb1ad28428e3e6933569e00e0e00edc1d8cd3a85661106696c78613a1bd",
-  "approvedAt": "2026-11-07T17:30:59.711Z",
+  "version": "1.0.1",
+  "sha256": "6acd5f8d4ad86b348a64504296ecc3e52ab9e0617ad9c41ec4b8c341f6cfa000",
+  "approvedAt": "2026-11-08T12:10:45.787Z",
   "neobase": ">=4.0.0",
-  "signature": "eRaXafR+X8DaZ2tgsxJEGjcufrOkBS8+ZTGsf7gzzeOCuC8q1F9YLN01BDCzsHE+4uD1OIef5KQtrNUhk2TCAw=="
+  "signature": "Gj/X0D3bjqtWbO2FRq9cmwq0iMykdemU+t3RcrwVh+vBA/zdkkxg7R74y+kvPwE77SExVTxyG1DR8UeWaOFlAg=="
 }
