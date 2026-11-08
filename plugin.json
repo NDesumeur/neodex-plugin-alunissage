@@ -3,7 +3,7 @@
   "name": "Alunissage",
   "version": "1.0.0",
   "author": "NDesumeur",
-  "description": "Pose le module lunaire en douceur sur une plateforme, avec peu de carburant. Plus la plateforme est petite, plus elle rapporte.",
+  "description": "Jeu d'adresse : pilote un module lunaire avec le moteur principal (flèche du haut) et les propulseurs latéraux, et pose-le en douceur sur l'une des trois plateformes avant d'être à court de carburant. Le tableau de bord passe au vert quand ta vitesse est sûre ; la petite plateforme multiplie les points par 5 et le carburant restant s'ajoute au score. La gravité augmente à chaque mission.",
   "icon": "icon.png",
   "entry": "index.js",
   "view": "alunissage",
