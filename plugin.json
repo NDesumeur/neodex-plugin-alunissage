@@ -1,16 +1,19 @@
 {
   "id": "neodex.alunissage",
   "name": "Alunissage",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "author": "NDesumeur",
-  "description": "Jeu d'adresse : pilote un module lunaire avec le moteur principal (flèche du haut) et les propulseurs latéraux, et pose-le en douceur sur l'une des trois plateformes avant d'être à court de carburant. Le tableau de bord passe au vert quand ta vitesse est sûre ; la petite plateforme multiplie les points par 5 et le carburant restant s'ajoute au score. La gravité augmente à chaque mission.",
+  "description": "Jeu d'adresse : pilote un module spatial et pose-le en douceur sur l'une des trois plateformes avant d'être à court de carburant. Une partie, c'est 3 vies et un score qui s'additionne, à travers quatre mondes : la Lune, Mars et son vent, Europe et sa glace qui fait glisser, un astéroïde sous les météores, avec des canyons et des plateformes qui bougent. Clavier, souris ou manette, plein écran.",
   "icon": "icon.png",
   "entry": "index.js",
   "view": "alunissage",
   "neobase": ">=4.0.0",
   "type": "app",
   "category": "Jeux",
-  "compatibility": ["windows", "linux"],
+  "compatibility": [
+    "windows",
+    "linux"
+  ],
   "syncMode": "progression",
   "syncInfo": "Mission atteinte, meilleur score.",
   "mobile": false,
@@ -19,5 +22,6 @@
   "sdk": "2.1.0",
   "permissions": [
     "storage"
-  ]
+  ],
+  "gamepad": true
 }
