@@ -19,5 +19,10 @@ module.exports = async ({ pj, sleep }) => {
   await run(`__over(19, 5, 6.5)`); await sleep(300); await shot('volante'); await sleep(1500); s = await st();
   if (s.mode !== 'won') throw new Error('plateforme volante : ' + JSON.stringify(s));
   await run(`__over(17, 3, 60)`); await sleep(900); await shot('meteores');
+  { // la zone de jeu tient dans la fenêtre, quelle que soit sa taille
+    const L = await pj(`(() => { const c = [...document.querySelectorAll('.gameBox canvas')].filter(c => c.offsetWidth).sort((a, b) => b.offsetWidth - a.offsetWidth)[0], r = c.getBoundingClientRect(); let s = 0; for (let e = c.parentElement; e; e = e.parentElement) s += e.scrollTop; return { top: Math.round(r.top + s), bottom: Math.round(r.bottom + s), h: Math.round(r.height), w: Math.round(r.width), wh: innerHeight, ww: innerWidth, sw: document.documentElement.scrollWidth }; })()`);
+    if (process.env.NEO_FIT_LOG) console.log('FIT', JSON.stringify(L));
+    if (L.bottom > L.wh + 1 || L.sw > L.ww + 1) throw new Error('la zone de jeu dépasse la fenêtre : ' + JSON.stringify(L));
+  }
   return 'posé sur ' + out.join(', ') + ' ; la glace fait glisser ; un crash coûte une vie ; posé sur la plateforme volante';
 };

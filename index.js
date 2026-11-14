@@ -17,7 +17,7 @@ const CSS = `.gMain{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
 .gSide .sysCard{display:flex;flex-direction:column}
 .gStats{display:grid;grid-template-columns:1fr auto;gap:4px 14px}
 .gStats b{text-align:right}
-.gameBox canvas{max-width:860px;aspect-ratio:320/220}
+.gameBox canvas{width:min(100%,max(300px,calc((100vh - 210px) * 320 / 220)));aspect-ratio:320/220}
 .gFs{position:absolute;top:14px;right:14px;opacity:.85}
 .gameBox:fullscreen{padding:0;background:#05010b}
 .gameBox:fullscreen .gFs{display:none}
