@@ -1,8 +1,14 @@
 # Alunissage (Moon Landing)
 
-A skill game: fly a space module down to the ground and land it gently on one of the pads before the fuel runs out. A game is 3 lives and a score that adds up from mission to mission, across four worlds: the Moon, windy Mars, icy Europa, and an asteroid under a meteor shower.
+A skill game: fly a space module down to the ground and land it gently on one of the pads before the fuel runs out. A game is 3 lives and a score that adds up from mission to mission, across five worlds: the Moon, windy Mars, icy Europa, an asteroid under a meteor shower, and Titan and its thick air.
 
 *Version française : [README.md](README.md)*
+
+## Graded landings and real gravity (new in 1.2.0)
+
+- **Every landing is graded out of 12**: touchdown speed (compared with the safe limit), the lander's **angle** (shown live under the gravity, green up to 3°), **centring** on the pad and **fuel** left, 3 points each. The grade goes from D to A, or **PERFECT** (12 out of 12, with a small fanfare). Each grade point adds 25 points to the score, before the pad multiplier. The side column keeps the number of perfect landings and the best grade for the mission.
+- **The real gravity of each body**, shown in m/s²: Moon 1.62, Mars 3.71 (the lander falls more than twice as fast, but the engine pushes harder, in the same proportion), Europa 1.31, the asteroid 0.25 (Vesta's: you almost float).
+- **A fifth world, Titan** (gravity 1.35): its **thick air** slows the lander, up and down as well as sideways; you never fall very fast, but you do not slide far either. Saturn shows through the orange haze, and a methane drizzle falls. The worlds then come back every 25 missions, harder.
 
 ## Controls
 

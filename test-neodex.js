@@ -6,9 +6,10 @@ module.exports = async ({ pj, sleep }) => {
   const st = () => pj(`document.getElementById('gc').__al()`), run = c => pj(`(document.getElementById('gc').${c}, 0)`);
   const shot = async name => { if (!process.env.NEO_SHOTS) return; const d = await pj(`document.getElementById('gc').toDataURL()`); fs.writeFileSync(path.join(process.env.NEO_SHOTS, 'alunissage-' + name + '.png'), Buffer.from(d.split(',')[1], 'base64')); };
   const out = [];
-  for (const [lv, name] of [[1, 'LUNE'], [6, 'MARS'], [11, 'EUROPE'], [16, 'ASTÉROÏDE']]) {
-    await run(`__over(${lv}, 2)`); await sleep(500); await shot(name.toLowerCase().replace('é', 'e').replace('ï', 'i')); await sleep(1800);
-    const s = await st(); if (s.world !== name || s.mode !== 'won') throw new Error(name + ' : ' + JSON.stringify(s)); out.push(name);
+  for (const [lv, name] of [[1, 'LUNE'], [6, 'MARS'], [11, 'EUROPE'], [16, 'ASTÉROÏDE'], [21, 'TITAN']]) {
+    await run(`__over(${lv}, 2, 8)`); await sleep(500); await shot(name.toLowerCase().replace('é', 'e').replace('ï', 'i').replace('É', 'E').replace('Ï', 'I')); await sleep(1800);
+    const s = await st(); if (s.world !== name || s.mode !== 'won' || !s.grade) throw new Error(name + ' : ' + JSON.stringify(s)); out.push(name + ' ' + s.grade);
+    if (name === 'LUNE') await shot('note');
   }
   await run(`__over(11, 3, 7)`); await run(`__set({vx: .12})`); await sleep(350);
   let s = await st(); if (!s.slide) throw new Error('la glace ne fait pas glisser : ' + JSON.stringify(s)); await shot('glisse');

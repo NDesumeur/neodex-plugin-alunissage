@@ -7,7 +7,7 @@ const HTML = `<div class="appWrap wide">
       <div class="sysCard"><b>RECORDS</b><div class="gStats" id="gStats"></div></div>
       <div class="row"><button class="btn main" id="gNew">NOUVELLE PARTIE</button></div>
       
-      <div class="hint">Une partie : 3 vies, le score s'additionne de mission en mission. Les vitesses passent au vert quand l'atterrissage est sans danger.</div><div class="hint">Tous les 5 missions, un nouveau monde (et une vie en plus) : la Lune, Mars et son vent, Europe et sa glace, un astéroïde et ses météores.</div><div class="hint">Manette : A ou gâchette droite pour le moteur, croix ou stick pour les propulseurs, Start pour la pause.</div>
+      <div class="hint">Une partie : 3 vies, le score s'additionne de mission en mission. Les vitesses passent au vert quand l'atterrissage est sans danger.</div><div class="hint">Tous les 5 missions, un nouveau monde (et une vie en plus) : la Lune, Mars et son vent, Europe et sa glace, un astéroïde et ses météores, Titan et son air épais. Chaque astre a sa vraie gravité : sur Mars le module tombe plus de deux fois plus vite que sur la Lune, mais le moteur y pousse plus fort.</div><div class="hint">Chaque atterrissage est noté sur 12 : vitesse au contact, angle du module, centrage sur la plateforme et carburant restant (3 chacun). Note D à A, ou PARFAIT ; une bonne note ajoute des points.</div><div class="hint">Manette : A ou gâchette droite pour le moteur, croix ou stick pour les propulseurs, Start pour la pause.</div>
     </div></div>
 </div>`;
 const CSS = `.gMain{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
@@ -333,7 +333,8 @@ const beep = (f, d = .1, type = 'square', slide = 0, vol = .08) => { try { actx 
 const keyOk = e => view.classList.contains('on') && !/INPUT|SELECT|TEXTAREA/.test(e.target.tagName);
 const showStats = rows => $('gStats').replaceChildren(...rows.flatMap(([a, b]) => [el('span', '', a), el('b', '', String(b))]));
 /* ---------- Alunissage : poser le module en douceur sur une plateforme, avec peu de carburant. Une partie : 3 vies, le score s'additionne de mission en mission.
-   Quatre mondes de 5 missions chacun (Lune, Mars et son vent, Europe et sa glace, un astéroïde et ses météores), puis ils reviennent, plus durs.
+   Cinq mondes de 5 missions chacun (Lune, Mars et son vent, Europe et sa glace, un astéroïde et ses météores, Titan et son air épais), avec la vraie gravité de chaque astre, puis ils reviennent, plus durs.
+   Chaque atterrissage est noté : vitesse, angle, centrage et carburant restant.
    Dans chaque monde : un canyon autour de la plateforme ×3 à partir de la 3e mission, une plateforme ×5 qui flotte et bouge à partir de la 4e. ---------- */
 const AL = {G: .012, THR: .032, SIDE: .016, SAFE_VY: .75, SAFE_VX: .45};
 const AL_PAL = {k: '#05010b', w: '#e8e8f0', W: '#a8a8c0', g: '#ffd84a', G: '#b08a10', b: '#3fa0ff', r: '#ff4a5a', o: '#ffa030', y: '#fff4a0'};
@@ -341,13 +342,21 @@ const AL_SHIP = spr(['....kkk....', '...kwwwk...', '..kwbbbwk..', '..kwbwbwk..',
 const AL_FLAME = [spr(['.kok.', 'koyok', '.kok.', '..k..'], AL_PAL), spr(['.kok.', 'koyok', 'koyok', '.kok.', '..k..'], AL_PAL)];
 // les mondes : gravité, couleurs du sol (arête, bord, trame, ombre, fond), ciel, et ce qui les rend différents
 const AL_WORLDS = [
-  {name: 'LUNE', g: 1, ground: ['#c8c8d8', '#8a8aa0', '#5a5a70', '#3a3a50', '#4a4a60'], sky: '#04030c'},
-  {name: 'MARS', g: 1.3, ground: ['#ffb08a', '#d0704a', '#a04a30', '#5a2418', '#7a3424'], sky: '#1a0806', wind: true},
-  {name: 'EUROPE', g: .85, ground: ['#ffffff', '#c8e8ff', '#8ab8e0', '#4a7aa8', '#6a9ac8'], sky: '#02060e', ice: true},
-  {name: 'ASTÉROÏDE', g: .55, ground: ['#a89880', '#7a6a58', '#5a4a3a', '#2a2018', '#3e3226'], sky: '#05020a', meteors: true},
+  {name: 'LUNE', ms2: 1.62, g: 1, ground: ['#c8c8d8', '#8a8aa0', '#5a5a70', '#3a3a50', '#4a4a60'], sky: '#04030c'},
+  {name: 'MARS', ms2: 3.71, g: 2.29, ground: ['#ffb08a', '#d0704a', '#a04a30', '#5a2418', '#7a3424'], sky: '#1a0806', wind: true},
+  {name: 'EUROPE', ms2: 1.31, g: .81, ground: ['#ffffff', '#c8e8ff', '#8ab8e0', '#4a7aa8', '#6a9ac8'], sky: '#02060e', ice: true},
+  {name: 'ASTÉROÏDE', ms2: .25, g: .154, ground: ['#a89880', '#7a6a58', '#5a4a3a', '#2a2018', '#3e3226'], sky: '#05020a', meteors: true},  // la gravité de Vesta
+  {name: 'TITAN', ms2: 1.35, g: .83, ground: ['#e8b86a', '#c08a40', '#8a5a2a', '#4a2a14', '#6a3e1e'], sky: '#2a1806', drag: true},
 ];
-const alWorld = lv => ({w: AL_WORLDS[Math.floor((lv - 1) / 5) % 4], step: (lv - 1) % 5, loop: Math.floor((lv - 1) / 20)});
-const als = gstore('alunissage', {games: 0, landed: 0, level: 1, top: 1});
+const alWorld = lv => ({w: AL_WORLDS[Math.floor((lv - 1) / 5) % AL_WORLDS.length], step: (lv - 1) % 5, loop: Math.floor((lv - 1) / (5 * AL_WORLDS.length))});
+const als = gstore('alunissage', {games: 0, landed: 0, level: 1, top: 1}); als.perfect ??= 0; als.grades ??= {};
+// la note d'un atterrissage : 0 à 3 pour la vitesse, l'angle, le centrage et le carburant
+const AL_GRADE = [[12, 'PARFAIT'], [10, 'A'], [7, 'B'], [4, 'C'], [0, 'D']];
+function alNotes(t, pad, fuel) {
+  const step = (v, a, b, c) => v <= a ? 3 : v <= b ? 2 : v <= c ? 1 : 0, sp = Math.max(t.vy / AL.SAFE_VY, Math.abs(t.vx) / AL.SAFE_VX), deg = Math.abs(t.tilt) * 180 / Math.PI;
+  const n = [step(sp, .3, .55, .8), step(deg, 3, 8, 15), step(Math.abs(t.off) / Math.max(1, pad.w / 2 - 5), .2, .5, .8), fuel >= 60 ? 3 : fuel >= 35 ? 2 : fuel >= 15 ? 1 : 0];
+  const s = n[0] + n[1] + n[2] + n[3]; return {n, s, grade: AL_GRADE.find(([m]) => s >= m)[1], deg: Math.round(deg)};
+}
 let al = null;
 function alTerrain(level) {  // un sol de collines, avec 3 plateformes plates : large ×2, moyenne ×3, étroite ×5
   const r = seeded(level * 6007), {step} = alWorld(level), pts = [], pads = [], spots = [[30 + r() * 40, 30, 2], [130 + r() * 30, 20, 3], [220 + r() * 50, 12, 5]].map(([a, w, m]) => [Math.round(a), w, m]);
@@ -374,19 +383,22 @@ const alPadX = p => p.float ? p.base + Math.sin(al.tick * p.sp) * p.amp : p.x0; 
 function alStart() { als.games++; saveGames(); al = Object.assign(al || {tick: 0, raf: 0}, {run: {score: 0, lives: 3}}); alNew(1); }
 function alNew(level) {
   als.level = level; saveGames(); const t = alTerrain(level), {w, step, loop} = alWorld(level);
-  al = Object.assign(al, {mode: 'ready', ...t, world: w, step, grav: AL.G * w.g * (1 + step * .05 + loop * .15), x: 40, y: 24, vx: .6, vy: 0, fuel: 100, keys: {}, why: '', score: 0, endAt: 0,
+  al = Object.assign(al, {mode: 'ready', ...t, world: w, step, grav: AL.G * w.g * (1 + step * .05 + loop * .15), thr: AL.THR * Math.max(.5, w.g), touch: null, x: 40, y: 24, vx: .6, vy: 0, fuel: 100, keys: {}, why: '', score: 0, endAt: 0,
     bg: null, ground: null, tilt: 0, squash: 0, dust: [], fx: [], meteors: [], warn: [], slide: null, ride: null, flame: false, side: false, wind: 0, windPh: level * 1.7, newWorld: step === 0 && level > 1});
   if (al.newWorld && al.run.lives < 5) { al.run.lives++; al.lifeUp = true; } else al.lifeUp = false;  // un nouveau monde rend une vie
   alInfo();
 }
 function alLand(pad) {  // posé : les points s'ajoutent à la partie, la fête
   al.mode = 'won'; al.endAt = al.tick; al.slide = null; al.y = pad.y - 6; al.squash = 10;
-  al.score = Math.round((50 + al.fuel * 5) * pad.mult); al.mult = pad.mult; al.run.score += al.score; als.landed++; if (als.level >= als.top) als.top = als.level + 1;
+  const t = al.touch || {vy: al.vy, vx: al.vx, tilt: al.tilt, off: al.x - (alPadX(pad) + pad.w / 2)}; al.notes = alNotes(t, pad, al.fuel);
+  if (al.notes.s > (als.grades[als.level] ?? -1)) als.grades[als.level] = al.notes.s; if (al.notes.s === 12) als.perfect++;
+  al.score = Math.round((50 + al.fuel * 5 + al.notes.s * 25) * pad.mult); al.mult = pad.mult; al.run.score += al.score; als.landed++; if (als.level >= als.top) als.top = als.level + 1;
   if (pad.float) al.ride = al.x - alPadX(pad);
   const X = alPadX(pad) + pad.w / 2;
   for (let i = 0; i < 40; i++) { const a = -Math.PI * Math.random(), v = 1 + Math.random() * 2.2; al.fx.push({x: X, y: pad.y - 2, vx: Math.cos(a) * v, vy: Math.sin(a) * v, t: 50 + Math.random() * 30, c: ['#ffd84a', '#5fdf6a', '#ffffff', '#3fa0ff'][i % 4]}); }
   best('alunissage', al.run.score); saveGames(); alInfo();
   [523, 659, 784, 1046].forEach((f, i) => setTimeout(() => beep(f, .16, 'triangle'), i * 110));
+  if (al.notes.s === 12) setTimeout(() => [1046, 1318, 1568, 2093].forEach((f, i) => setTimeout(() => beep(f, .12, 'square', 0, .05), i * 70)), 500);  // PARFAIT : une petite fanfare de plus
 }
 function alCrash(why) {
   al.mode = 'over'; al.endAt = al.tick; al.why = why; al.slide = null; al.boom = []; al.run.lives--;
@@ -397,13 +409,14 @@ function alUpdate() {
   const k = al.keys, up = k.up && al.fuel > 0 && !al.slide, left = k.left && al.fuel > 0, right = k.right && al.fuel > 0;
   if (al.world.wind) { al.wind = Math.sin(al.tick * .008 + al.windPh) * (.6 + al.step * .15) + Math.sin(al.tick * .031) * .25; if (!al.slide) al.vx += al.wind * .0045; }
   if (left) { al.vx -= AL.SIDE; al.fuel -= .1; } if (right) { al.vx += AL.SIDE; al.fuel -= .1; }
-  al.side = left || right; al.tilt += ((right - left) * .28 + al.vx * .2 - al.tilt) * .15;
+  al.side = left || right; al.tilt += (((right ? 1 : 0) - (left ? 1 : 0)) * .28 + al.vx * .2 - al.tilt) * .15;
   if (al.slide) {  // sur la glace d'Europe : le module glisse, les propulseurs freinent
     const p = al.slide; al.vx *= .992; al.x += al.vx; al.fuel = Math.max(0, al.fuel);
     if (al.x - 5 < p.x0 - 1 || al.x + 5 > p.x0 + p.w + 1) return alCrash('Glissé hors de la plateforme');
     if (Math.abs(al.vx) < .03) alLand(p); return;
   }
-  al.vy += al.grav; if (up) { al.vy -= AL.THR; al.fuel -= .22; }
+  al.vy += al.grav; if (up) { al.vy -= al.thr; al.fuel -= .22; }
+  if (al.world.drag) { al.vx *= .985; al.vy *= .99; }  // l'air épais de Titan : on ne tombe jamais très vite, mais le vent de côté s'arrête vite aussi
   al.fuel = Math.max(0, al.fuel); const prevFoot = al.y + 6; al.x += al.vx; al.y += al.vy; al.flame = up;
   if (al.x < 6) { al.x = 6; al.vx = 0; } if (al.x > W - 6) { al.x = W - 6; al.vx = 0; }
   const foot = al.y + 6, gl = Math.min(alGround(al.x - 5), alGround(al.x + 5)), soft = al.vy <= AL.SAFE_VY && Math.abs(al.vx) <= AL.SAFE_VX;
@@ -413,7 +426,7 @@ function alUpdate() {
       if (al.x - 5 < X - 1 || al.x + 5 > X + p.w + 1) return alCrash('Pas sur une plateforme');
       const rel = al.vx - p.amp * p.sp * Math.cos(al.tick * p.sp);
       if (al.vy > AL.SAFE_VY) return alCrash('Trop vite vers le bas'); if (Math.abs(rel) > AL.SAFE_VX) return alCrash('Trop vite de côté');
-      al.x = Math.max(X + 5, Math.min(X + p.w - 5, al.x)); return alLand(p);
+      al.x = Math.max(X + 5, Math.min(X + p.w - 5, al.x)); al.touch = {vy: al.vy, vx: rel, tilt: al.tilt, off: al.x - (X + p.w / 2)}; return alLand(p);
     }
   }
   if (al.world.meteors) {  // les météores : un « ! » prévient d'où ils arrivent
@@ -428,6 +441,7 @@ function alUpdate() {
     const pad = al.pads.find(p => !p.float && al.x - 5 >= p.x0 - 1 && al.x + 5 <= p.x0 + p.w + 1);
     if (!pad) return alCrash('Pas sur une plateforme');
     if (!soft) return alCrash(al.vy > AL.SAFE_VY ? 'Trop vite vers le bas' : 'Trop vite de côté');
+    al.touch = {vy: al.vy, vx: al.vx, tilt: al.tilt, off: al.x - (pad.x0 + pad.w / 2)};
     if (al.world.ice && Math.abs(al.vx) >= .03) { al.slide = pad; al.y = pad.y - 6; al.vy = 0; al.squash = 6; beep(1200, .2, 'triangle', 600, .04); return; }
     return alLand(pad);
   }
@@ -453,6 +467,10 @@ function alPlanet(b, w) {
     disc(236, 70, 5, (x, y) => Math.sin(x * 2 + y) > .6 ? '#5a4a40' : x + y > 3 ? '#4a3a32' : '#8a7a6a'); disc(150, 60, 3, () => '#ffe8c0');
   } else if (w.name === 'EUROPE') {  // Jupiter, énorme, avec ses bandes et sa tache
     disc(292, 78, 34, (x, y, d) => { const sp = Math.hypot((x + 10) / 1.6, y - 9) < 4; const band = ['#e8d0a8', '#c89a6a', '#f4e4c8', '#a8744a', '#e0c49a', '#b8845a'][Math.floor((y + 34 + Math.sin(x * .2) * 1.5) / 6) % 6]; return sp ? '#c8503a' : x + y * .2 > 18 ? '#4a3420' : band; });
+  } else if (w.name === 'TITAN') {  // Saturne et ses anneaux, à peine visibles dans la brume orange
+    disc(250, 64, 20, (x, y) => (Math.floor((y + 20) / 5) % 2 ? '#c8a060' : '#b08850'));
+    for (let x = -36; x <= 36; x++) { const y = Math.round(x * .18); if (Math.abs(x) > 19 || y > 1) px(b, '#d8c090', 250 + x, 64 + y, 1, 1); }
+    for (let y = 0; y < 150; y++) { b.globalAlpha = .55 * (1 - y / 150) + .15; px(b, '#a86a2a', 0, y, W, 1); } b.globalAlpha = 1;
   } else {  // l'astéroïde : un soleil lointain et une nébuleuse
     for (let x = 0; x < W; x++) for (let y = 0; y < 110; y++) { const v = Math.sin(x * .03 + y * .05) + Math.sin(x * .011 - y * .07) - Math.abs(y - 40 - x * .15) * .03; if (v > 1.2 && (x + y) % 2) px(b, v > 1.6 ? '#3a1a4a' : '#24102e', x, y); }
     disc(196, 62, 6, (x, y, d) => d > 5 ? '#ffa030' : '#fff4a0');
@@ -477,6 +495,7 @@ function alDraw() {
   // poussière, vent, météores
   for (const d of al.dust) { if (playing) { d.x += d.vx; d.y += d.vy; d.vy += .02; d.t--; } px(g, d.t > 20 ? G[1] : G[2], d.x, d.y, 1, 1); } al.dust = al.dust.filter(d => d.t > 0);
   if (w.wind) for (let i = 0; i < 26; i++) { const sp = 1 + (i % 4) * .6, x = ((i * 53 + al.tick * al.wind * sp * 1.4) % W + W) % W, y = 40 + (i * 37) % 150; px(g, i % 3 ? '#a0603a' : '#d0906a', x, y + Math.sin(al.tick * .05 + i) * 2, 2, 1); }
+  if (w.drag) for (let i = 0; i < 40; i++) { const x = ((i * 47 + al.tick * 1.2) % (W + 40)) - 20, y = ((i * 71 + al.tick * 2.2) % 200); px(g, '#d89a4a', x, y, 1, 2); }  // la bruine de méthane
   for (const m of al.warn) if (m.t % 10 < 6) pxFont(g, '!', m.x, 10, '#ff4a5a', 8, 'center');
   for (const m of al.meteors) { for (let i = 1; i < 6; i++) px(g, i < 3 ? '#ffa030' : '#7a3a10', m.x - m.vx * i * 1.5, m.y - m.vy * i * 1.5, 2, 2); px(g, '#ffffff', m.x - 1, m.y - 1, 3, 3); px(g, '#ffd84a', m.x, m.y, 2, 2); }
   // le module : il penche, ses pieds s'écrasent au contact, flammes et petits jets
@@ -502,19 +521,22 @@ function alDraw() {
   pxFont(g, w.name + ' · MISSION ' + als.level, W - 6, 12, '#c8c8e0', 6, 'right');
   pxFont(g, String(al.run.score), W - 6, 26, '#ffffff', 8, 'right');
   for (let i = 0; i < al.run.lives; i++) g.drawImage(AL_SHIP, W - 16 - i * 13, 31);
+  pxFont(g, 'g ' + w.ms2.toFixed(2).replace('.', ',') + ' m/s²', W - 6, 64, '#8a8aa8', 6, 'right');
+  if (playing) { const deg = Math.round(Math.abs(al.tilt) * 180 / Math.PI); pxFont(g, 'angle ' + deg + '°', W - 6, 74, deg <= 3 ? '#5fdf6a' : deg <= 8 ? '#ffd84a' : '#ffa030', 6, 'right'); }
   if (w.wind) pxFont(g, 'VENT ' + (al.wind < 0 ? '←' : '→') + ' ' + Math.round(Math.abs(al.wind) * 10), 92, 12, '#d0906a', 6);
   if (al.slide) pxFont(g, 'ÇA GLISSE ! FREINE ← →', W / 2, 60, al.tick % 20 < 12 ? '#c8e8ff' : '#ffffff', 8, 'center');
   const T = 30;  // les messages, en haut du ciel : ils ne cachent jamais les plateformes
   if (al.mode === 'ready') gameText(g, W, al.newWorld ? [['NOUVEAU MONDE : ' + w.name, '#ffd84a', 12], [AL_TIP[AL_WORLDS.indexOf(w)], '#ffffff'], [al.lifeUp ? 'Une vie en plus !' : 'Mission ' + als.level, '#5fdf6a'], ['Espace, ↑ ou clic pour partir', '#ffd84a']]
     : als.level === 1 ? [['ALUNISSAGE', '#ffd84a', 14], ['↑ pousse, ← → glissent', '#ffffff'], ['Arrive lentement sur une plateforme', '#a8a8c0'], ['Espace, ↑ ou clic pour partir', '#ffd84a']]
     : [['MISSION ' + als.level, '#ffd84a', 12], [AL_STEP[al.step], '#ffffff'], ['Espace, ↑ ou clic pour partir', '#ffd84a']], T);
-  if (al.mode === 'won' && al.tick - al.endAt > 30) gameText(g, W, [['POSÉ ! ×' + al.mult, '#5fdf6a', 12], ['+' + al.score + ' · total ' + al.run.score, '#ffffff'], ['Clic : mission suivante', '#ffd84a']], T);
+  if (al.mode === 'won' && al.tick - al.endAt > 30) { const N = al.notes, gc = {PARFAIT: '#ffd84a', A: '#5fdf6a', B: '#8ad8ff', C: '#ffa030', D: '#ff4a5a'}[N.grade];
+    gameText(g, W, [['POSÉ ×' + al.mult + ' · ' + (N.s === 12 ? 'PARFAIT !' : 'NOTE ' + N.grade), gc, 12], ['Vitesse ' + N.n[0] + ' · Angle ' + N.n[1] + ' · Centre ' + N.n[2] + ' · Carburant ' + N.n[3] + ' sur 3', '#c8c8e0'], ['+' + al.score + ' · total ' + al.run.score, '#ffffff'], ['Clic : mission suivante', '#ffd84a']], T); }
   if (al.mode === 'over' && al.tick - al.endAt > 40) gameText(g, W, al.run.lives ? [['CRASH', '#ff4a5a', 12], [al.why, '#ffffff'], [al.run.lives + (al.run.lives > 1 ? ' vies restantes' : ' vie restante') + ' · clic pour réessayer', '#ffd84a']]
     : [['PARTIE FINIE', '#ff4a5a', 12], [al.why, '#ffffff'], [al.run.score + ' points · mission ' + als.level, '#ffffff'], ['Clic : nouvelle partie', '#ffd84a']], T);
   if (al.mode === 'pause') gameText(g, W, [['PAUSE', '#ffd84a', 12], ['P pour reprendre', '#ffffff']], T);
   alEngine(playing && al.flame, playing && al.side && al.fuel > 0);
 }
-const AL_TIP = ['Gravité de la Lune', 'Le vent pousse le module : regarde les drapeaux', 'La glace glisse : freine avec ← → une fois posé', 'Gravité faible, attention aux météores'];
+const AL_TIP = ['Gravité de la Lune : 1,62 m/s²', 'Gravité 3,71 : ça tombe vite, et le vent pousse', 'La glace glisse : freine avec ← → une fois posé', 'Presque pas de gravité, attention aux météores', 'L’air épais freine tout : profite-en pour viser'];
 const AL_STEP = ['', 'La gravité augmente', 'Un canyon autour de la plateforme ×3', 'La plateforme ×5 flotte et bouge', 'Canyon et plateforme mobile'];
 const alKey = (e, down) => {
   if (!keyOk(e) || !al) return; const m = {ArrowUp: 'up', z: 'up', w: 'up', ArrowLeft: 'left', q: 'left', a: 'left', ArrowRight: 'right', d: 'right'}[e.key.length === 1 ? e.key.toLowerCase() : e.key];
@@ -545,21 +567,26 @@ cv.onpointerup = () => { if (al) al.keys.up = false; };
   requestAnimationFrame(loop);
 }
 $('gFs').onclick = () => { $('gFs').blur(); if (document.fullscreenElement) document.exitFullscreen(); else cv.parentElement.requestFullscreen?.().catch(() => {}); };
-function alInfo() { showStats([['Meilleure partie', games.best.alunissage || 0], ['Partie en cours', al?.run ? al.run.score + ' · ' + al.run.lives + (al.run.lives > 1 ? ' vies' : ' vie') : '—'], ['Mission la plus loin', als.top], ['Atterrissages', als.landed]]); }
+function alInfo() { showStats([['Meilleure partie', games.best.alunissage || 0], ['Partie en cours', al?.run ? al.run.score + ' · ' + al.run.lives + (al.run.lives > 1 ? ' vies' : ' vie') : '—'], ['Mission la plus loin', als.top], ['Atterrissages', als.landed], ['Parfaits', als.perfect], ['Note de cette mission', als.grades[als.level] != null ? AL_GRADE.find(([m]) => als.grades[als.level] >= m)[1] + ' · ' + als.grades[als.level] + '/12' : '—']]); }
 $('gNew').onclick = () => { alStart(); $('gNew').blur(); };
 {  // vérification : trois plateformes à chaque mission, le canyon laisse la place de se poser sur la ×3, un module qui tombe s'écrase, un bon atterrissage compte, une partie a 3 vies
-  let ok = true; const keep = al, ks = {...als}, kb = games.best.alunissage;
+  let ok = true; const keep = al, ks = {...als, grades: {...als.grades}}, kb = games.best.alunissage;
   al = {tick: 0, raf: 0, run: {score: 0, lives: 3}};
   for (let lv = 1; lv <= 60; lv++) { const t = alTerrain(lv); ok &&= t.pads.length === 3 && t.pads.every(p => p.w >= 12);
     al.pts = t.pts; for (const p of t.pads) if (!p.float) for (const c of [p.x0 + 5, p.x0 + p.w / 2, p.x0 + p.w - 5]) ok &&= Math.abs(Math.min(alGround(c - 5), alGround(c + 5)) - p.y) < .5; }
   alNew(1); al.mode = 'play'; al.x = 100; al.vy = 2; for (let i = 0; i < 400 && al.mode === 'play'; i++) alUpdate(); const crashed = al.mode === 'over' && al.run.lives === 2;
   alNew(1); const p2 = al.pads.find(p => p.mult === 2); al.mode = 'play'; al.x = p2.x0 + p2.w / 2; al.y = p2.y - 20; al.vx = 0; al.vy = 0; al.keys = {}; for (let i = 0; i < 400 && al.mode === 'play'; i++) { al.keys.up = al.vy > .4; alUpdate(); }
   const landed = al.mode === 'won' && al.run.score > 0;
+  const pad = {w: 30}, perf = alNotes({vy: .1, vx: 0, tilt: 0, off: 1}, pad, 80), bad = alNotes({vy: .7, vx: .1, tilt: .3, off: 9}, pad, 10);
+  ok &&= perf.grade === 'PARFAIT' && perf.s === 12 && bad.grade === 'D' && bad.n.join() === '0,0,0,0';
+  alNew(6); ok &&= Math.abs(al.grav / al.thr - AL.G / AL.THR) < 1e-9 && al.world.name === 'MARS';  // sur Mars : plus lourd, mais le moteur suit
+  alNew(21); ok &&= al.world.name === 'TITAN' && al.world.drag; al.mode = 'play'; al.x = 150; al.y = 30; al.vy = 0; for (let i = 0; i < 200; i++) { al.vy += al.grav; al.vy *= .99; } ok &&= al.vy < 1.1;
+  ok &&= alWorld(26).loop === 1 && alWorld(26).w.name === 'LUNE';
   cv.dataset.selfcheck = ok && crashed && landed ? 'ok' : 'raté ' + JSON.stringify({ok, crashed, landed, mode: al.mode});
   al = keep; Object.assign(als, ks); if (kb === undefined) delete games.best.alunissage; else games.best.alunissage = kb;
 }
 // pour le test de NeoDex : l'état de la partie, et un module posé juste au-dessus d'une plateforme d'une mission choisie
-cv.__al = () => ({mode: al.mode, level: als.level, world: al.world.name, score: al.run.score, lives: al.run.lives, why: al.why, slide: !!al.slide});
+cv.__al = () => ({mode: al.mode, level: als.level, world: al.world.name, score: al.run.score, lives: al.run.lives, why: al.why, slide: !!al.slide, grade: al.notes?.grade, stars: al.notes?.s});
 cv.__set = o => { Object.assign(al, o); };
 cv.__over = (lv, mult, dy = 16) => { alNew(lv); const p = al.pads.find(q => q.mult === mult); al.mode = 'play'; al.x = alPadX(p) + p.w / 2; al.y = p.y - dy; al.vx = p.float ? p.amp * p.sp * Math.cos(al.tick * p.sp) : 0; al.vy = 0; al.fuel = 100; al.meteors = []; al.warn = []; al.world = {...al.world, meteors: false, wind: false}; };
 ctx.onOpen(() => { if (!al) alStart(); gameLoop(al, 'alunissage', alUpdate, alDraw); alInfo(); });

@@ -1,9 +1,9 @@
 {
   "id": "neodex.alunissage",
   "name": "Alunissage",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "author": "NDesumeur",
-  "description": "Jeu d'adresse : pilote un module spatial et pose-le en douceur sur l'une des trois plateformes avant d'être à court de carburant. Une partie, c'est 3 vies et un score qui s'additionne, à travers quatre mondes : la Lune, Mars et son vent, Europe et sa glace qui fait glisser, un astéroïde sous les météores, avec des canyons et des plateformes qui bougent. Clavier, souris ou manette, plein écran.",
+  "description": "Jeu d'adresse : pilote un module spatial et pose-le en douceur sur l'une des trois plateformes avant d'être à court de carburant. Une partie, c'est 3 vies et un score qui s'additionne, à travers cinq mondes : la Lune, Mars et son vent, Europe et sa glace qui fait glisser, un astéroïde sous les météores, Titan et son air épais, avec des canyons et des plateformes qui bougent. Clavier, souris ou manette, plein écran. Nouveau : chaque atterrissage est noté sur 12 (vitesse, angle, centrage, carburant), de D à PARFAIT ; la vraie gravité de chaque astre en m/s² ; un cinquième monde, Titan, où l'air épais freine tout.",
   "icon": "icon.png",
   "entry": "index.js",
   "view": "alunissage",

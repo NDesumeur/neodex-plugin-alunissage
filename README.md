@@ -1,8 +1,14 @@
 # Alunissage
 
-Un jeu d'adresse : pilote un module spatial jusqu'au sol et pose-le en douceur sur l'une des plateformes, sans tomber en panne de carburant. Une partie, c'est 3 vies et un score qui s'additionne de mission en mission, à travers quatre mondes : la Lune, Mars et son vent, Europe et sa glace, un astéroïde et ses météores.
+Un jeu d'adresse : pilote un module spatial jusqu'au sol et pose-le en douceur sur l'une des plateformes, sans tomber en panne de carburant. Une partie, c'est 3 vies et un score qui s'additionne de mission en mission, à travers cinq mondes : la Lune, Mars et son vent, Europe et sa glace, un astéroïde et ses météores, Titan et son air épais.
 
 *English version: [README.en.md](README.en.md)*
+
+## Atterrissages notés et vraie gravité (nouveau en 1.2.0)
+
+- **Chaque atterrissage est noté sur 12** : la vitesse au contact (comparée à la limite sans danger), l'**angle** du module (affiché en direct sous la gravité, vert jusqu'à 3°), le **centrage** sur la plateforme et le **carburant** restant, 3 points chacun. La note va de D à A, ou **PARFAIT** (12 sur 12, avec une petite fanfare). Chaque point de note ajoute 25 points au score, avant le multiplicateur de la plateforme. La colonne garde le nombre d'atterrissages parfaits et la meilleure note de la mission.
+- **La vraie gravité de chaque astre**, affichée en m/s² : Lune 1,62, Mars 3,71 (le module tombe plus de deux fois plus vite, mais le moteur pousse plus fort, à la même proportion), Europe 1,31, l'astéroïde 0,25 (celle de Vesta : on flotte presque).
+- **Un cinquième monde, Titan** (gravité 1,35) : son **air épais** freine le module, de haut en bas comme de côté ; on ne tombe jamais très vite, mais on ne glisse pas loin non plus. Saturne se devine dans la brume orange, une bruine de méthane tombe. Les mondes reviennent ensuite tous les 25 missions, plus durs.
 
 ## Commandes
 
