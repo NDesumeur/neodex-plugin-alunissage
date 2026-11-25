@@ -301,6 +301,9 @@ export default async function (ctx) {
   const saveGames = () => { clearTimeout(gamesTimer); gamesTimer = setTimeout(() => { gamesTimer = null; folder.write('games', games).catch(() => {}); }, 500); };
   const best = (k, v) => { const b = games.best[k]; if (b == null || v > b) { games.best[k] = v; saveGames(); return true; } return false; };
   const gstore = (k, init) => (games[k] ??= init);
+  // les trophées de NeoDex (3.4.8 et plus) : succès et records déclarés dans plugin.json ; sur un NeoDex plus ancien, rien ne se passe
+  const trophy = id => { ctx.games?.unlock(id).catch(() => {}); };
+  const trophyRecord = (id, v) => { if (v != null && Number.isFinite(+v)) ctx.games?.record(id, +v).catch(() => {}); };
 function gameLoop(st, appKey, update, draw) {
   cancelAnimationFrame(st.raf);
   const STEP = 1000 / 60; let acc = 0, last = performance.now();
@@ -567,7 +570,8 @@ cv.onpointerup = () => { if (al) al.keys.up = false; };
   requestAnimationFrame(loop);
 }
 $('gFs').onclick = () => { $('gFs').blur(); if (document.fullscreenElement) document.exitFullscreen(); else cv.parentElement.requestFullscreen?.().catch(() => {}); };
-function alInfo() { showStats([['Meilleure partie', games.best.alunissage || 0], ['Partie en cours', al?.run ? al.run.score + ' · ' + al.run.lives + (al.run.lives > 1 ? ' vies' : ' vie') : '—'], ['Mission la plus loin', als.top], ['Atterrissages', als.landed], ['Parfaits', als.perfect], ['Note de cette mission', als.grades[als.level] != null ? AL_GRADE.find(([m]) => als.grades[als.level] >= m)[1] + ' · ' + als.grades[als.level] + '/12' : '—']]); }
+function alInfo() {
+  setTimeout(alTrophies); showStats([['Meilleure partie', games.best.alunissage || 0], ['Partie en cours', al?.run ? al.run.score + ' · ' + al.run.lives + (al.run.lives > 1 ? ' vies' : ' vie') : '—'], ['Mission la plus loin', als.top], ['Atterrissages', als.landed], ['Parfaits', als.perfect], ['Note de cette mission', als.grades[als.level] != null ? AL_GRADE.find(([m]) => als.grades[als.level] >= m)[1] + ' · ' + als.grades[als.level] + '/12' : '—']]); }
 $('gNew').onclick = () => { alStart(); $('gNew').blur(); };
 {  // vérification : trois plateformes à chaque mission, le canyon laisse la place de se poser sur la ×3, un module qui tombe s'écrase, un bon atterrissage compte, une partie a 3 vies
   let ok = true; const keep = al, ks = {...als, grades: {...als.grades}}, kb = games.best.alunissage;
@@ -589,5 +593,12 @@ $('gNew').onclick = () => { alStart(); $('gNew').blur(); };
 cv.__al = () => ({mode: al.mode, level: als.level, world: al.world.name, score: al.run.score, lives: al.run.lives, why: al.why, slide: !!al.slide, grade: al.notes?.grade, stars: al.notes?.s});
 cv.__set = o => { Object.assign(al, o); };
 cv.__over = (lv, mult, dy = 16) => { alNew(lv); const p = al.pads.find(q => q.mult === mult); al.mode = 'play'; al.x = alPadX(p) + p.w / 2; al.y = p.y - dy; al.vx = p.float ? p.amp * p.sp * Math.cos(al.tick * p.sp) : 0; al.vy = 0; al.fuel = 100; al.meteors = []; al.warn = []; al.world = {...al.world, meteors: false, wind: false}; };
+// les trophées, tirés des statistiques et des records gardés (aussi à l'ouverture : ce qui a été fait avant compte)
+function alTrophies() {
+  const b = games.best.alunissage, t = als.landed ? als.top : 0, sig = [b, als.landed, t, als.perfect].join(); if (sig === alTrophies.sig) return; alTrophies.sig = sig;
+  trophyRecord('score', b || null); trophyRecord('mission', t || null);
+  if (als.landed >= 1) trophy('premier'); if (t >= 5) trophy('m5'); if (t >= 10) trophy('m10'); if (t >= 20) trophy('m20'); if (als.landed >= 50) trophy('cinquante');
+  if (als.perfect >= 1) trophy('parfait'); if (als.perfect >= 10) trophy('parfaits10'); if (b >= 5000) trophy('s5000');
+}
 ctx.onOpen(() => { if (!al) alStart(); gameLoop(al, 'alunissage', alUpdate, alDraw); alInfo(); });
 }

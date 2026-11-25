@@ -1,7 +1,7 @@
 {
   "id": "neodex.alunissage",
   "name": "Alunissage",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "author": "NDesumeur",
   "description": "Jeu d'adresse : pilote un module spatial et pose-le en douceur sur l'une des trois plateformes avant d'être à court de carburant. Une partie, c'est 3 vies et un score qui s'additionne, à travers cinq mondes : la Lune, Mars et son vent, Europe et sa glace qui fait glisser, un astéroïde sous les météores, Titan et son air épais, avec des canyons et des plateformes qui bougent. Clavier, souris ou manette, plein écran. Nouveau : chaque atterrissage est noté sur 12 (vitesse, angle, centrage, carburant), de D à PARFAIT ; la vraie gravité de chaque astre en m/s² ; un cinquième monde, Titan, où l'air épais freine tout.",
   "icon": "icon.png",
@@ -22,6 +22,62 @@
   "sdk": "2.1.0",
   "permissions": [
     "storage"
+  ],
+  "succes": [
+    {
+      "id": "premier",
+      "nom": "Un petit pas",
+      "texte": "Réussir un premier atterrissage"
+    },
+    {
+      "id": "m5",
+      "nom": "Pilote confirmé",
+      "texte": "Atteindre la mission 5"
+    },
+    {
+      "id": "m10",
+      "nom": "Vétéran de l'espace",
+      "texte": "Atteindre la mission 10"
+    },
+    {
+      "id": "m20",
+      "nom": "Face cachée",
+      "texte": "Atteindre la mission 20"
+    },
+    {
+      "id": "cinquante",
+      "nom": "Habitué des cratères",
+      "texte": "Réussir 50 atterrissages"
+    },
+    {
+      "id": "parfait",
+      "nom": "Plume",
+      "texte": "Réussir un atterrissage parfait"
+    },
+    {
+      "id": "parfaits10",
+      "nom": "Toucher de velours",
+      "texte": "Réussir 10 atterrissages parfaits"
+    },
+    {
+      "id": "s5000",
+      "nom": "Belle mission",
+      "texte": "Marquer 5 000 points en une partie"
+    }
+  ],
+  "records": [
+    {
+      "id": "score",
+      "nom": "Meilleure partie",
+      "sens": "haut",
+      "format": "nombre"
+    },
+    {
+      "id": "mission",
+      "nom": "Mission la plus loin",
+      "sens": "haut",
+      "format": "nombre"
+    }
   ],
   "gamepad": true
 }
